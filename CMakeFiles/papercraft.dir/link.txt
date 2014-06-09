@@ -1,0 +1,1 @@
+/usr/bin/c++    -frounding-math -O3 -DNDEBUG    CMakeFiles/papercraft.dir/mesh_segmentation.cpp.o CMakeFiles/papercraft.dir/papercraft.cpp.o  -o papercraft  -L/usr/local/lib -rdynamic -lmpfr -lgmp /usr/local/lib/libCGAL.so -lboost_thread -lboost_system /usr/local/lib/libCGAL.so -lboost_thread -lboost_system -Wl,-rpath,/usr/local/lib 
