@@ -15,6 +15,7 @@
 #include <fstream>
 #include <cmath>
 #include <algorithm>
+#include <stack>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef CGAL::Polyhedron_3<Kernel> Polyhedron;
@@ -24,6 +25,8 @@ typedef Polyhedron::Vertex_iterator Vertex_iterator;
 typedef Polyhedron::Halfedge_iterator HE_iterator;
 typedef Polyhedron::Halfedge_handle HE_handle;
 typedef Polyhedron::Facet_handle Facet_handle;
+typedef Polyhedron::Vertex_handle Vertex_handle;
+typedef Polyhedron::Vertex_iterator Vertex_iterator;
 typedef Polyhedron::Edge_iterator Edge_iterator;
 typedef Polyhedron::Halfedge_around_vertex_const_circulator  HV_circulator;
 
@@ -39,10 +42,21 @@ class MeshSegmentation {
   ~MeshSegmentation(){};
 
   void compute_sod();
+
+  void expand_feature_curve(HE_handle start);
+  
+ private:
+  double sharpness(std::vector<HE_handle>& s);
  private:
   Polyhedron mesh;
   const double ratio;
   Edge_double_map sod;
+
+  double threshold;
+  std::vector<Edge_iterator> edges_with_high_sod;
+  //the half edge status
+  enum he_status {NOT_FEATURE, FEATURE, FEATURE_NEIGHBOUR};
+  std::map<HE_handle, he_status> mesh_status;
 };
 
 #endif

@@ -46,7 +46,7 @@ CMAKE_COLOR_MAKEFILE:BOOL=ON
 CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
 
 //C++ compiler flags for both Release and Debug
-CMAKE_CXX_FLAGS:STRING= -frounding-math
+CMAKE_CXX_FLAGS:STRING= -frounding-math -std=c++11
 
 //Flags used by the compiler during debug builds.
 CMAKE_CXX_FLAGS_DEBUG:STRING=-g
@@ -203,7 +203,7 @@ Boost_DIR-ADVANCED:INTERNAL=1
 Boost_INCLUDE_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CGAL_Boost_USE_STATIC_LIBS
 CGAL_Boost_USE_STATIC_LIBS-ADVANCED:INTERNAL=1
-CGAL_EXECUTABLE_TARGETS:INTERNAL=papercraft
+CGAL_EXECUTABLE_TARGETS:INTERNAL=papercraft;papercraft
 //ADVANCED property for variable: CMAKE_AR
 CMAKE_AR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_BUILD_TOOL

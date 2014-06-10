@@ -31,24 +31,8 @@ cmath
 -
 algorithm
 -
-
-/home/tintin/Research/PaperCraftPapers/project/papercraft.cpp
-CGAL/Exact_predicates_inexact_constructions_kernel.h
+stack
 -
-CGAL/Polyhedron_3.h
--
-CGAL/IO/Polyhedron_iostream.h
--
-iostream
--
-fstream
--
-cmath
--
-algorithm
--
-mesh_segmentation.h
-/home/tintin/Research/PaperCraftPapers/project/mesh_segmentation.h
 
 /usr/local/include/CGAL/AABB_face_graph_triangle_primitive.h
 CGAL/AABB_primitive.h
