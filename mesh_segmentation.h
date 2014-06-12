@@ -28,13 +28,14 @@ typedef Polyhedron::Facet_handle Facet_handle;
 typedef Polyhedron::Vertex_handle Vertex_handle;
 typedef Polyhedron::Vertex_iterator Vertex_iterator;
 typedef Polyhedron::Edge_iterator Edge_iterator;
-typedef Polyhedron::Halfedge_around_vertex_const_circulator  HV_circulator;
+typedef Polyhedron::Halfedge_around_vertex_circulator  HV_circulator;
 
 typedef Kernel::Vector_3 Vector_3;
 
 typedef std::map<Polyhedron::Edge_iterator, double> Edge_double_map;
 
 Vector_3 normal(Facet& f);
+Vector_3 direction(HE_handle he);
 
 class MeshSegmentation {
  public:
@@ -43,9 +44,10 @@ class MeshSegmentation {
 
   void compute_sod();
 
-  void expand_feature_curve(HE_handle start);
+  void compute_feature();
   
  private:
+  void expand_feature_curve(HE_handle start);
   double sharpness(std::vector<HE_handle>& s);
  private:
   Polyhedron mesh;
@@ -60,3 +62,4 @@ class MeshSegmentation {
 };
 
 #endif
+

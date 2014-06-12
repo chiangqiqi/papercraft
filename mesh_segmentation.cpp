@@ -7,6 +7,11 @@ Vector_3 normal(Facet& f){
 			     h->next()->vertex()->point() - h->vertex()->point(),
 			     h->next()->next()->vertex()->point() - h->next()->vertex()->point());
 }
+//direction of the halfedge
+Vector_3 direction(HE_handle he) {
+  return (he -> vertex() -> point() -
+	  he -> prev() -> vertex() -> point() ); 
+}
 
 MeshSegmentation::MeshSegmentation(Polyhedron& _p) :
   ratio(0.05) {
@@ -33,6 +38,7 @@ void MeshSegmentation::compute_sod() {
 
     sod[ei] = acos( (n1/sqrt(n1.squared_length())) * (n2/sqrt(n2.squared_length())) );
     sodvalues.push_back(sod[ei]);
+    //std::cout << direction(ei) << std::endl;
   }
   
   std::sort(sodvalues.begin(), sodvalues.end(),
@@ -59,12 +65,10 @@ double MeshSegmentation::sharpness(std::vector<HE_handle>& s) {
 
 //Levy02's method to expand feature curve
 void MeshSegmentation::expand_feature_curve(HE_handle start) {
-  const int MAX_STRING_LENGTH = 15;
-  const int MIN_FEATURE_LENGTH = 5;
+  const int MAX_STRING_LENGTH = 5;
+  const int MIN_FEATURE_LENGTH = 15;
 
-  enum status {VISITED, NOT_VISITED} ;
   std::vector<HE_handle> detected_feature;
-  std::map<HE_handle, status> visited_status;
   
   for (auto he : {start, start -> opposite()}) {
     HE_handle heprime = he;
@@ -72,6 +76,7 @@ void MeshSegmentation::expand_feature_curve(HE_handle start) {
     std::vector<HE_handle> path;
     //use dfs to determine S
     do {
+      path.erase( path.begin(), path.end() );
       std::stack<HE_handle> s;
       //path to store the maximum value path
 
@@ -84,15 +89,16 @@ void MeshSegmentation::expand_feature_curve(HE_handle start) {
       std::map<HE_handle, int> deapth_map;
       //mark all the edges as not discoverd
       for (HE_iterator he = mesh.halfedges_begin();
-	   he != mesh.halfedges_end(); he++)
-	dfs_status[he] = NOT_DISCOVERED;
+      	   he != mesh.halfedges_end(); he++)
+      	dfs_status[he] = NOT_DISCOVERED;
       
       s.push(heprime);
-      deapth_map[heprime] = 1;
+      deapth_map[heprime] = 0;
       sharpness_map[heprime] = sod[heprime];
       HE_handle max_he;
-      double max_sharpness;
-      
+      double max_sharpness = 0;
+
+      //dfs loop
       while( !s.empty() ) {
 	auto he1 = s.top();
 	s.pop();
@@ -102,11 +108,16 @@ void MeshSegmentation::expand_feature_curve(HE_handle start) {
 	  //push all the adjacent halfedges to stack
 	  Vertex_handle v = he1 -> opposite() -> vertex();
 	  
-	  for(HV_circulator hc = v -> vertex_begin();
-	      hc != v -> vertex_begin(); hc++) {
-	    Polyhedron::Halfedge halfedge = *hc;
-	    HE_handle hh = &halfedge;
-	    
+	  //for(HV_circulator hc = v -> vertex_begin();
+	  //hc != v -> vertex_begin(); hc++) {
+	  HV_circulator hc = v -> vertex_begin();
+	  //loop through the neighbour of the vertex
+	  do{
+	    hc++;
+	    //Polyhedron::Halfedge halfedge = *hc;
+	    HE_handle hh = hc;
+	    //ToDo Direction of the new edge is almost in the same
+	    //direction as hprime
 	    if(dfs_status[hh] == NOT_DISCOVERED &&
 	       mesh_status[hh] == NOT_FEATURE ) {
 	      s.push(hh);
@@ -122,29 +133,57 @@ void MeshSegmentation::expand_feature_curve(HE_handle start) {
 	    }else{
 	      continue;
 	    }
-	  }
+	  }while(hc != v -> vertex_begin());
+	  
 	}else{
+	  dfs_status[he1] = DISCOVERED;
 	  continue;
 	}
       }//end while
       //make the path from the parent map
       HE_handle he_tmp = max_he;
-      size_t path_sz = path.size();
+      
       while (parent_map.count(he_tmp) != 0 ) {
 	path.push_back(he_tmp);
 	he_tmp = parent_map[he_tmp]; 
       }
-      heprime = path[path_sz-2];
+      size_t path_sz = path.size();
+      
+      //only for testing
+      //std::cout << path_sz << std::endl;
+      if(path.size() == 0) break;
+      
+      heprime = path.back();
       detected_feature.push_back(heprime);
       
     } while( sharpness(path) > MAX_STRING_LENGTH * threshold );
-      
+    //std::cout << detected_feature.size() << std::endl;
   }//endfor
 
   if(detected_feature.size() > MIN_FEATURE_LENGTH ) {
     for(auto h : detected_feature) {
-      
+      mesh_status[h] = FEATURE;
+    
+      Vertex_handle v = h -> opposite() -> vertex();
+      //it's neighbour marked as feature neighbour
+      for(HV_circulator hc = v -> vertex_begin();
+	  hc != v -> vertex_begin(); hc++) {
+	Polyhedron::Halfedge halfedge = *hc;
+	HE_handle hh = &halfedge;
+	
+	if(mesh_status[hh] == NOT_FEATURE) {
+	  mesh_status[hh] = FEATURE_NEIGHBOUR;
+	}
+      }
     }
   }
 }//end function
+
+void MeshSegmentation::compute_feature() {
+  for(auto h : edges_with_high_sod){
+    HE_handle he = h;
+    std::cout << sod[h] << '\t' << sod[he] << std::endl;
+    expand_feature_curve(h);
+  }
+}
 

@@ -21,4 +21,5 @@ int main(){
 
     MeshSegmentation ms(mesh);
     ms.compute_sod();
+    //    ms.compute_feature();
 }
